@@ -5,7 +5,6 @@
 //  Created by Syd Polk on 2/7/25.
 //
 
-import AVFAudio
 import SwiftUI
 
 class WristBeatViewModel: ObservableObject {
