@@ -19,6 +19,7 @@ struct WristBeatView: View {
                 .focusable(true)
                 .digitalCrownRotation($viewModel.beatsPerMinute, from: 60.0, through: 350.0, by: 1.0, sensitivity: .low, isContinuous: false, isHapticFeedbackEnabled: true)
                 .multilineTextAlignment(.center)
+            
             HStack(spacing: 0) {
 
                 Button(action: {
@@ -35,10 +36,7 @@ struct WristBeatView: View {
                 .buttonBorderShape(.buttonBorder)
 
                 Button(action: {
-                    viewModel.isPlaying.toggle()
-                    if viewModel.isPlaying {
-                        viewModel.startHapticLoop()
-                    }
+                    viewModel.setPlaying(!viewModel.isPlaying)
                 }) {
                     Image(systemName: viewModel.isPlaying ? "square.fill" : "play.fill")
                         .resizable()
