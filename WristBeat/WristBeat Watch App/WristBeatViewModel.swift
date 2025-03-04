@@ -27,11 +27,7 @@ class WristBeatViewModel: ObservableObject {
     @MainActor var workoutSession: HKWorkoutSession?
     
     var taps: [Date] = []
- 
-    @MainActor init() {
-        self.beatsPerMinute = UserDefaults.standard.double(forKey: "beatsPerMinute")
-    }
-    
+
     @MainActor
     func setPlaying() {
         self.isPlaying.toggle()

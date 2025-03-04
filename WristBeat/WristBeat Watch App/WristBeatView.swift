@@ -28,7 +28,7 @@ struct WristBeatView: View {
                     Image(systemName: "hand.tap.fill")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 30, height: 30)
+                        .frame(width: 55, height: 55)
                         .foregroundColor(.primary)
                         .padding(10)
                 }
