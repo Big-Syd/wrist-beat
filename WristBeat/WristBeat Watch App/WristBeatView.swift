@@ -36,25 +36,12 @@ struct WristBeatView: View {
                 .buttonBorderShape(.buttonBorder)
 
                 Button(action: {
-                    viewModel.setPlaying(!viewModel.isPlaying)
+                    viewModel.setPlaying()
                 }) {
                     Image(systemName: viewModel.isPlaying ? "square.fill" : "play.fill")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 55, height: 55)
-                        .foregroundColor(.primary)
-                        .padding(10)
-                }
-                .buttonStyle(.borderless)
-                .buttonBorderShape(.buttonBorder)
-                
-                Button(action: {
-                    viewModel.toggleMute()
-                }) {
-                    Image(systemName: viewModel.isMuted ? "speaker.slash.circle.fill" : "speaker.circle.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
                         .foregroundColor(.primary)
                         .padding(10)
                 }

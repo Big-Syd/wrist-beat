@@ -5,45 +5,73 @@
 //  Created by Syd Polk on 2/7/25.
 //
 
+import HealthKit
 import SwiftUI
 
 class WristBeatViewModel: ObservableObject {
-    @MainActor @Published var beatsPerMinute: Double = 120
+    @MainActor @Published var beatsPerMinute: Double = {
+        if UserDefaults.standard.object(forKey: "beatsPerMinute") != nil {
+            return UserDefaults.standard.double(forKey: "beatsPerMinute")
+        }
+        return 120.0
+    }() {
+        didSet {
+            UserDefaults.standard.set(beatsPerMinute, forKey: "beatsPerMinute")
+        }
+    }
     @MainActor @Published var isPlaying: Bool = false
-    @MainActor @Published var isMuted: Bool = false
     
+    @MainActor var tapTask: Task<Void, Never>? = nil
     @MainActor var resetTapTask: Task<Void, Never>? = nil
+    @MainActor var healthStore = HKHealthStore()
+    @MainActor var workoutSession: HKWorkoutSession?
+    
     var taps: [Date] = []
  
+    @MainActor init() {
+        self.beatsPerMinute = UserDefaults.standard.double(forKey: "beatsPerMinute")
+    }
+    
     @MainActor
-    func setPlaying(_ playing: Bool) {
-        self.isPlaying = playing
+    func setPlaying() {
+        self.isPlaying.toggle()
         self.checkForPlaying()
     }
 
     @MainActor
     private func checkForPlaying() {
-        if !self.isPlaying {
-            Task { @MainActor in
+        if self.isPlaying {
+            if let tapTask, !tapTask.isCancelled {
+                return
+            }
+            tapTask = Task { @MainActor in
                 await self.startHapticLoop()
             }
+        } else {
+            workoutSession?.end()
+            tapTask?.cancel()
+            tapTask = nil
         }
     }
     
     @MainActor
     private func startHapticLoop() async {
-        while isPlaying {
-            WKInterfaceDevice.current().play(isMuted ? .click : .start)
-            try? await Task.sleep(nanoseconds: UInt64((60 * 1_000_000_000) / beatsPerMinute))
+        let config = HKWorkoutConfiguration()
+        config.activityType = .other
+        config.locationType = .unknown
+        
+        do {
+            workoutSession = try HKWorkoutSession(healthStore: healthStore, configuration: config)
+            workoutSession?.startActivity(with: Date()) // Keeps the app running
+            while isPlaying {
+                WKInterfaceDevice.current().play(.start)
+                try? await Task.sleep(nanoseconds: UInt64((60 * 1_000_000_000) / beatsPerMinute))
+            }
+        } catch {
+            print("Failed to start workout session: \(error)")
         }
     }
 
-    func toggleMute() {
-        Task { @MainActor in
-            isMuted.toggle()
-        }
-    }
-    
     @MainActor
     func makeResetTask() {
         self.resetTapTask = Task {
